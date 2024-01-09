@@ -21,17 +21,11 @@ spring:
     hibernate:
       ddl-auto: update
 
-management.health.circuitbreakers.enabled: true
-
-resilience4j.circuitbreaker:
-  configs:
-    default:
-      registerHealthIndicator: true
-
 resilience4j:
   circuitbreaker:
-    instances:
+    configs:
       default:
+        registerHealthIndicator: true
         failure-rate-threshold: 50
         minimum-number-of-calls: 20
         automatic-transition-from-open-to-half-open-enabled: true
@@ -39,3 +33,17 @@ resilience4j:
         permitted-number-of-calls-in-half-open-state: 2
         sliding-window-size: 20
         sliding-window-type: count_based
+    instances:
+      externalService:
+        base-config: default
+
+management:
+  server:
+    port: 8081
+  health:
+    circuitbreakers:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: '*'

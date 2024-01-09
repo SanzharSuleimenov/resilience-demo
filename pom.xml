@@ -93,7 +93,7 @@
         <artifactId>gatling-maven-plugin</artifactId>
         <version>4.2.9</version>
         <configuration>
-          <simulationClass>com.parqour.resiliencedemo.simulation.CircuitBreakerSimulation</simulationClass>
+          <simulationClass>com.parqour.resiliencedemo.simulation.LoadSimulation</simulationClass>
         </configuration>
       </plugin>
     </plugins>

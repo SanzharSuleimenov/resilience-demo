@@ -1,4 +1,4 @@
-package com.parqour.resiliencedemo.domain;
+package com.parqour.resiliencedemo.adapter.out.persistence;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

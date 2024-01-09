@@ -1,6 +1,5 @@
-package com.parqour.resiliencedemo.repository;
+package com.parqour.resiliencedemo.adapter.out.persistence;
 
-import com.parqour.resiliencedemo.domain.ParkingRoute;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

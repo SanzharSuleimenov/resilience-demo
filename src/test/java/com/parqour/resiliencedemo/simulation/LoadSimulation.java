@@ -17,12 +17,11 @@ import io.gatling.javaapi.http.HttpProtocolBuilder;
 import io.gatling.javaapi.http.HttpRequestActionBuilder;
 import java.time.Duration;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-public class CircuitBreakerSimulation extends Simulation {
+public class LoadSimulation extends Simulation {
 
   {
     setUp(paymentScenario()
@@ -85,7 +84,6 @@ public class CircuitBreakerSimulation extends Simulation {
   }
 
   private static FeederBuilder<Object> parkingUIDFeeder() {
-    Iterator<Map<String, Object>> iterator;
     List<Map<String, Object>> feeder = new LinkedList<>();
     for (int i = 0; i < 5; i++) {
       feeder.add(Collections.singletonMap("parking_uid", i));
