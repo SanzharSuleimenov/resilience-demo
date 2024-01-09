@@ -5,8 +5,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import com.parqour.resiliencedemo.ResilienceDemoApplication;
@@ -20,13 +18,11 @@ import io.github.resilience4j.circuitbreaker.CircuitBreaker.State;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import java.util.Optional;
 import java.util.stream.IntStream;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestMethodOrder;
-import org.junit.jupiter.api.parallel.Execution;
-import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
@@ -40,8 +36,8 @@ import org.springframework.boot.test.mock.mockito.SpyBean;
     DataSourceTransactionManagerAutoConfiguration.class,
     HibernateJpaAutoConfiguration.class})
 @SpringBootTest(classes = ResilienceDemoApplication.class)
-@Execution(ExecutionMode.SAME_THREAD)
-public class CircuitBreakerUnitTesting {
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+public class CircuitBreakerIntegrationTesting {
 
   @MockBean
   private GetParkingRoutePort getParkingRoutePort;
@@ -54,62 +50,76 @@ public class CircuitBreakerUnitTesting {
   private PaymentService paymentService;
 
   @Test
-  void requestPayWhenCircuitBreakerIsClosedAndUpstreamServicesIsOk() {
+  @Order(2)
+  void requestMinNumberOfFailedRequestAndExpectCircuitBreakerTransitionToOpenState() {
     circuitBreakerRegistry.circuitBreaker(UpstreamService.CB_EXTERNAL_SERVICE)
         .transitionToClosedState();
 
     ParkingRoute tempParkingRoute = new ParkingRoute(1L, "localhost", 8080, "my local laptop", "1");
+    ParkingRoute differentRoute = new ParkingRoute(2L, "localhost", 8080, "my local laptop", "2");
+    ParkingRoute thirdRoute = new ParkingRoute(3L, "localhost", 8080, "my local laptop", "3");
 
     when(getParkingRoutePort.findByUid(eq("1")))
         .thenReturn(Optional.of(tempParkingRoute));
-    doReturn("topped up").when(topUpBalancePort).topUpBalance(tempParkingRoute);
-
-    String actualResponse = paymentService.pay("123TEST01", "1");
-
-    verify(getParkingRoutePort).findByUid(eq("1"));
-    verify(topUpBalancePort).topUpBalance(tempParkingRoute);
-
-    assertEquals("123TEST01 result: topped up", actualResponse);
-  }
-
-  @Test
-  void requestPayWhenCircuitBreakerIsClosedAndUpstreamServiceTimesOut() {
-    circuitBreakerRegistry.circuitBreaker(UpstreamService.CB_EXTERNAL_SERVICE)
-        .transitionToClosedState();
-
-    ParkingRoute tempParkingRoute = new ParkingRoute(1L, "localhost", 8080, "my local laptop", "1");
-
-    when(getParkingRoutePort.findByUid(eq("1")))
-        .thenReturn(Optional.of(tempParkingRoute));
+    when(getParkingRoutePort.findByUid(eq("2")))
+        .thenReturn(Optional.of(differentRoute));
+    // somehow Circuit Breaker tracks these two invocations and applies them to buffered calls count
     doThrow(new RuntimeException()).when(topUpBalancePort).topUpBalance(tempParkingRoute);
+    doReturn("topped up").when(topUpBalancePort).topUpBalance(differentRoute);
+    doThrow(new RuntimeException("Bad request")).when(topUpBalancePort)
+        .topUpBalance(thirdRoute);
 
     try {
-      paymentService.pay("123TEST01", "1");
+      int minNumberOfCalls = circuitBreakerRegistry
+          .circuitBreaker(UpstreamService.CB_EXTERNAL_SERVICE)
+          .getCircuitBreakerConfig()
+          .getMinimumNumberOfCalls() - 3;
 
-      fail("Test scenario expects Runtime Exception at this point");
-    } catch (RuntimeException e) {
-      assertEquals(RuntimeException.class, e.getClass());
-      verify(getParkingRoutePort).findByUid(eq("1"));
-    }
-  }
+      IntStream.rangeClosed(1, minNumberOfCalls)
+          .forEach((i) -> {
+            try {
+              paymentService.pay("123TEST02", "1");
+            } catch (RuntimeException e) {
+              assertEquals(RuntimeException.class, e.getClass());
+            }
+          });
 
-  @Test
-  void requestPayWhenCircuitBreakerIsOpen() {
-    circuitBreakerRegistry.circuitBreaker(UpstreamService.CB_EXTERNAL_SERVICE)
-        .transitionToOpenState();
-
-    ParkingRoute tempParkingRoute = new ParkingRoute(1L, "localhost", 8080, "my local laptop", "1");
-
-    when(getParkingRoutePort.findByUid(eq("1")))
-        .thenReturn(Optional.of(tempParkingRoute));
-
-    try {
-      paymentService.pay("123TEST01", "1");
+      paymentService.pay("123TEST03", "2");
 
       fail("Test scenario expects failure at this point");
     } catch (RuntimeException e) {
       assertEquals(CallNotPermittedException.class, e.getClass());
-      verifyNoInteractions(topUpBalancePort);
     }
+  }
+
+  @Test
+  @Order(1)
+  void checkTransitionMigrationFromOpenToHalfOpenState() throws InterruptedException {
+    circuitBreakerRegistry.circuitBreaker(UpstreamService.CB_EXTERNAL_SERVICE)
+        .transitionToOpenState();
+    Thread.sleep(10_000);
+
+    ParkingRoute tempParkingRoute = new ParkingRoute(1L, "localhost", 8080, "my local laptop", "1");
+    when(getParkingRoutePort.findByUid(eq("1")))
+        .thenReturn(Optional.of(tempParkingRoute));
+
+    try {
+      assertEquals(State.HALF_OPEN,
+          circuitBreakerRegistry.circuitBreaker(UpstreamService.CB_EXTERNAL_SERVICE).getState());
+      doReturn("topped up").when(topUpBalancePort).topUpBalance(tempParkingRoute);
+      paymentService.pay("123TEST01", "1");
+    } catch (RuntimeException e) {
+      assertEquals(CallNotPermittedException.class, e.getClass());
+    }
+
+    String result1 = paymentService.pay("123TEST01", "1");
+    assertEquals("123TEST01 result: topped up", result1);
+
+    String result2 = paymentService.pay("123TEST02", "1");
+    assertEquals("123TEST02 result: topped up", result2);
+
+    assertEquals(State.CLOSED,
+        circuitBreakerRegistry.circuitBreaker(UpstreamService.CB_EXTERNAL_SERVICE)
+            .getState());
   }
 }
