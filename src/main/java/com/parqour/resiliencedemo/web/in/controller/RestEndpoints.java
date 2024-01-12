@@ -19,7 +19,7 @@ public class RestEndpoints {
 
   @PostMapping("/v1/pay")
   public ResponseEntity<String> pay(@RequestParam(name = "parking_uid") String parkingUID,
-      @RequestParam(name = "plate_number") String plateNumber) {
+      @RequestParam(name = "plate_number") String plateNumber) throws Exception {
 
     return ResponseEntity.ok(paymentService.pay(plateNumber, parkingUID));
   }

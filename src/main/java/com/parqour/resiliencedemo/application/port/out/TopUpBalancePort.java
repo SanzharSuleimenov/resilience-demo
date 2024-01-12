@@ -4,5 +4,5 @@ import com.parqour.resiliencedemo.adapter.out.persistence.ParkingRoute;
 
 public interface TopUpBalancePort {
 
-  String topUpBalance(ParkingRoute parkingRoute);
+  String topUpBalance(ParkingRoute parkingRoute) throws Exception;
 }

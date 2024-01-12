@@ -31,6 +31,11 @@ public class ParkingRoutePersistenceAdapter implements GetParkingRoutePort, Save
     return parkingRouteRepository.count();
   }
 
+  @Override
+  public List<ParkingRoute> findAll() {
+    return parkingRouteRepository.findAll();
+  }
+
   @PostConstruct
   public void init() {
     long count = count();

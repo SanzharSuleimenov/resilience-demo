@@ -19,7 +19,7 @@ public class PaymentServiceImpl implements PaymentService {
   private final TopUpBalancePort topUpBalancePort;
 
   @Override
-  public String pay(String plateNumber, String parkingUID) {
+  public String pay(String plateNumber, String parkingUID) throws Exception {
     Optional<ParkingRoute> parkingRouteOptional = getParkingRoutePort.findByUid(parkingUID);
     if (parkingRouteOptional.isEmpty()) {
       throw new EntityNotFoundException("Parking not found");
