@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -17,6 +18,7 @@ public class ParkingRoutePersistenceAdapter implements GetParkingRoutePort, Save
   private final ParkingRouteRepository parkingRouteRepository;
 
   @Override
+  @Cacheable("parking_routes")
   public Optional<ParkingRoute> findByUid(String uid) {
     return parkingRouteRepository.findByUid(uid);
   }

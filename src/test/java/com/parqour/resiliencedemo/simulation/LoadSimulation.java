@@ -1,5 +1,6 @@
 package com.parqour.resiliencedemo.simulation;
 
+import static io.gatling.javaapi.core.CoreDsl.atOnceUsers;
 import static io.gatling.javaapi.core.CoreDsl.constantUsersPerSec;
 import static io.gatling.javaapi.core.CoreDsl.exec;
 import static io.gatling.javaapi.core.CoreDsl.listFeeder;
@@ -27,15 +28,21 @@ public class LoadSimulation extends Simulation {
     setUp(paymentScenario()
         .injectOpen(
             nothingFor(Duration.ofSeconds(5)),
-            rampUsers(100).during(Duration.ofSeconds(30)),
-            constantUsersPerSec(8).during(Duration.ofSeconds(60)).randomized(),
-            rampUsersPerSec(9).to(4).during(Duration.ofSeconds(45)).randomized())
+            atOnceUsers(10),
+            rampUsers(30).during(Duration.ofSeconds(5)),
+            constantUsersPerSec(20).during(Duration.ofSeconds(15)),
+            rampUsersPerSec(20).to(40).during(Duration.ofSeconds(30)),
+            constantUsersPerSec(40).during(Duration.ofSeconds(120)),
+            rampUsersPerSec(40).to(20).during(Duration.ofSeconds(30)),
+            constantUsersPerSec(20).during(Duration.ofSeconds(15)),
+            rampUsers(30).during(Duration.ofSeconds(5))
+        )
         .protocols(httpProtocolBuilder()));
   }
 
   private static HttpProtocolBuilder httpProtocolBuilder() {
     return http.baseUrl("http://localhost:8080")
-        .maxConnectionsPerHost(10)
+        .maxConnectionsPerHost(20)
         .userAgentHeader("Gatling circuit breaker / local");
   }
 
@@ -50,7 +57,7 @@ public class LoadSimulation extends Simulation {
     return scenario("Payment simulation with circuit breaker on post method")
         .feed(plateNumberFeeder().circular())
         .feed(parkingUIDFeeder().circular())
-        .repeat(100).on(exec(payRequest()));
+        .repeat(10).on(exec(payRequest()));
   }
 
   private static FeederBuilder<Object> plateNumberFeeder() {
@@ -85,7 +92,7 @@ public class LoadSimulation extends Simulation {
 
   private static FeederBuilder<Object> parkingUIDFeeder() {
     List<Map<String, Object>> feeder = new LinkedList<>();
-    for (int i = 0; i < 5; i++) {
+    for (int i = 1; i < 6; i++) {
       feeder.add(Collections.singletonMap("parking_uid", i));
     }
     return listFeeder(feeder);

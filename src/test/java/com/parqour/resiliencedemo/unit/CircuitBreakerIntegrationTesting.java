@@ -53,8 +53,10 @@ public class CircuitBreakerIntegrationTesting {
     circuitBreakerRegistry.circuitBreaker(UpstreamService.CB_EXTERNAL_SERVICE)
         .transitionToClosedState();
 
-    ParkingRoute tempParkingRoute = new ParkingRoute(1L, "localhost", 8080, UpstreamService.CB_EXTERNAL_SERVICE, "1");
-    ParkingRoute differentRoute = new ParkingRoute(2L, "localhost", 8080, UpstreamService.CB_EXTERNAL_SERVICE, "2");
+    ParkingRoute tempParkingRoute = new ParkingRoute(1L, "localhost", 8080,
+        UpstreamService.CB_EXTERNAL_SERVICE, "1");
+    ParkingRoute differentRoute = new ParkingRoute(2L, "localhost", 8080,
+        UpstreamService.CB_EXTERNAL_SERVICE, "2");
 
     when(getParkingRoutePort.findByUid(eq("1")))
         .thenReturn(Optional.of(tempParkingRoute));
@@ -92,10 +94,14 @@ public class CircuitBreakerIntegrationTesting {
   @Order(1)
   void checkTransitionMigrationFromOpenToHalfOpenState() throws Exception {
     circuitBreakerRegistry.circuitBreaker(UpstreamService.CB_EXTERNAL_SERVICE)
+        .reset();
+    circuitBreakerRegistry.circuitBreaker(UpstreamService.CB_EXTERNAL_SERVICE)
         .transitionToOpenState();
-    Thread.sleep(10_000);
 
-    ParkingRoute tempParkingRoute = new ParkingRoute(1L, "localhost", 8080, UpstreamService.CB_EXTERNAL_SERVICE, "1");
+    Thread.sleep(10_000L);
+
+    ParkingRoute tempParkingRoute = new ParkingRoute(1L, "localhost", 8080,
+        UpstreamService.CB_EXTERNAL_SERVICE, "1");
 
     when(getParkingRoutePort.findByUid(eq("1"))).thenReturn(Optional.of(tempParkingRoute));
     when(restTemplate.postForEntity("http://localhost:8080/top-up", null, String.class))
@@ -114,9 +120,6 @@ public class CircuitBreakerIntegrationTesting {
 
     String result2 = paymentService.pay("123TEST02", "1");
     assertEquals("123TEST02 result: topped up", result2);
-
-    System.out.println(circuitBreakerRegistry.circuitBreaker(UpstreamService.CB_EXTERNAL_SERVICE)
-        .getMetrics().getFailureRate());
 
     assertEquals(State.CLOSED,
         circuitBreakerRegistry.circuitBreaker(UpstreamService.CB_EXTERNAL_SERVICE)

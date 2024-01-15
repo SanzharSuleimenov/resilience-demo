@@ -10,6 +10,8 @@ resilience4j:
         permitted-number-of-calls-in-half-open-state: 2
         sliding-window-size: 20
         sliding-window-type: count_based
+        slow-call-duration-threshold: 10s
+        slow-call-rate-threshold: 50
     instances:
       externalService:
         base-config: default
