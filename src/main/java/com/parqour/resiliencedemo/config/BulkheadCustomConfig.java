@@ -29,7 +29,7 @@ public class BulkheadCustomConfig implements CommandLineRunner {
   @Bean
   public BulkheadRegistry bulkheadRegistry() {
     BulkheadConfig config = BulkheadConfig.custom()
-        .maxConcurrentCalls(30)
+        .maxConcurrentCalls(5)
         .maxWaitDuration(Duration.ofMillis(700))
         .build();
 

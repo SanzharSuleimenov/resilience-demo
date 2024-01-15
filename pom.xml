@@ -104,7 +104,7 @@
         <artifactId>gatling-maven-plugin</artifactId>
         <version>4.2.9</version>
         <configuration>
-          <simulationClass>com.parqour.resiliencedemo.simulation.LoadSimulation</simulationClass>
+          <simulationClass>com.parqour.resiliencedemo.simulation.BulkheadLoadSimulation</simulationClass>
         </configuration>
       </plugin>
     </plugins>
