@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api")
-public class RestEndpoints {
+public class PayController {
 
   private final PaymentService paymentService;
 

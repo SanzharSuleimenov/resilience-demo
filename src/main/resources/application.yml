@@ -58,3 +58,6 @@ resilience4j:
         base-config: default
         wait-duration-in-open-state: 30s
         failure-rate-threshold: 75
+
+rest-client:
+  base-url: https://jsonplaceholder.typicode.com
