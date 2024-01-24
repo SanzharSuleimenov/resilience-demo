@@ -6,11 +6,11 @@ spring:
     username: ${DATASOURCE_USERNAME:postgres}
     password: ${DATASOURCE_PASSWORD:postgrespw}
     hikari:
-      minimumIdle: ${HIKARI_POOL_MINIMUM_IDLE:1}
-      maximumPoolSize: ${HIKARI_POOL_MAXIMUM_POOL_SIZE:2}
-      idleTimeout: ${HIKARI_POOL_IDLE_TIMEOUT:60000}
+      minimumIdle: ${HIKARI_POOL_MINIMUM_IDLE:20}
+      maximumPoolSize: ${HIKARI_POOL_MAXIMUM_POOL_SIZE:220}
+      idleTimeout: ${HIKARI_POOL_IDLE_TIMEOUT:10000}
       maxLifetime: 2000000
-      connectionTimeout: ${HIKARI_CONNECTION_TIMEOUT:60000}
+      connectionTimeout: ${HIKARI_CONNECTION_TIMEOUT:30000}
   jpa:
     properties:
       hibernate:
@@ -42,7 +42,7 @@ resilience4j:
     configs:
       default:
         registerHealthIndicator: true
-        failure-rate-threshold: 50
+        failure-rate-threshold: 40
         minimum-number-of-calls: 20
         automatic-transition-from-open-to-half-open-enabled: true
         wait-duration-in-open-state: 10s
@@ -50,7 +50,7 @@ resilience4j:
         sliding-window-size: 20
         sliding-window-type: count_based
         slow-call-duration-threshold: 10s
-        slow-call-rate-threshold: 50
+        slow-call-rate-threshold: 70
     instances:
       externalService:
         base-config: default

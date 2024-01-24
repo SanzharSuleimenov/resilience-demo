@@ -57,7 +57,7 @@ public class CircuitBreakerLoadSimulation extends Simulation {
     return scenario("Payment simulation with circuit breaker on post method")
         .feed(plateNumberFeeder().circular())
         .feed(parkingUIDFeeder().circular())
-        .repeat(10).on(exec(payRequest()));
+        .exec(payRequest());
   }
 
   private static FeederBuilder<Object> plateNumberFeeder() {
@@ -92,7 +92,7 @@ public class CircuitBreakerLoadSimulation extends Simulation {
 
   private static FeederBuilder<Object> parkingUIDFeeder() {
     List<Map<String, Object>> feeder = new LinkedList<>();
-    for (int i = 1; i < 6; i++) {
+    for (int i = 1; i < 25; i++) {
       feeder.add(Collections.singletonMap("parking_uid", i));
     }
     return listFeeder(feeder);

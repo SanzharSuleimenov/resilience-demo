@@ -3,6 +3,7 @@ package com.parqour.resiliencedemo.adapter.out.persistence;
 import com.parqour.resiliencedemo.application.port.out.GetParkingRoutePort;
 import com.parqour.resiliencedemo.application.port.out.SaveParkingRoutePort;
 import jakarta.annotation.PostConstruct;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -43,12 +44,25 @@ public class ParkingRoutePersistenceAdapter implements GetParkingRoutePort, Save
     long count = count();
     if (count == 0) {
       log.info("Parking Routes missing. Starting data insertion...");
-      List<ParkingRoute> parkingRouteList = List.of(
-          ParkingRoute.builder().host("localhost").port(8080).uid("1").name("localhost--1").build(),
-          ParkingRoute.builder().host("localhost").port(8080).uid("2").name("localhost--2").build(),
-          ParkingRoute.builder().host("localhost").port(8080).uid("3").name("localhost--3").build(),
-          ParkingRoute.builder().host("localhost").port(8080).uid("4").name("localhost--4").build(),
-          ParkingRoute.builder().host("localhost").port(8080).uid("5").name("localhost--5").build());
+      List<ParkingRoute> parkingRouteList = new LinkedList<>();
+      StringBuilder stringBuilder = new StringBuilder();
+      stringBuilder.append("localhost--");
+      for (int i = 1; i < 201; ++i) {
+        stringBuilder.append(i);
+        parkingRouteList.add(ParkingRoute.builder()
+            .host("localhost")
+            .port(8080)
+            .uid(String.valueOf(i))
+            .name(stringBuilder.toString())
+            .build());
+        if (i < 10) {
+          stringBuilder.deleteCharAt(stringBuilder.length() - 1);
+        } else if (i < 100) {
+          stringBuilder.delete(stringBuilder.length() - 2, stringBuilder.length());
+        } else {
+          stringBuilder.delete(stringBuilder.length() - 3, stringBuilder.length());
+        }
+      }
       saveParkingRoutes(parkingRouteList);
       log.info("Parking Routes inserted.");
     } else {

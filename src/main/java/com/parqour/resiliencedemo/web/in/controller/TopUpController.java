@@ -11,7 +11,7 @@ public class TopUpController {
 
   @PostMapping("/top-up")
   public String topUp(@RequestParam int val) throws InterruptedException {
-    if (val > 100 && val < 1000) {
+    if (val > 300 && val < 1400) {
       Thread.sleep(15_000L);
     } else if (val > 3000 && val < 4500) {
       Thread.sleep(20_000L);
