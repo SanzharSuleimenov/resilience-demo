@@ -61,3 +61,6 @@ resilience4j:
 
 rest-client:
   base-url: https://jsonplaceholder.typicode.com
+
+json-placeholder:
+  base-url: https://jsonplaceholder.typicode.com

@@ -35,7 +35,11 @@
       <artifactId>spring-boot-starter-aop</artifactId>
     </dependency>
 
-    <!-- https://mvnrepository.com/artifact/io.github.resilience4j/resilience4j-all -->
+    <dependency>
+      <groupId>org.apache.httpcomponents.client5</groupId>
+      <artifactId>httpclient5</artifactId>
+    </dependency>
+
     <dependency>
       <groupId>io.github.resilience4j</groupId>
       <artifactId>resilience4j-spring-boot3</artifactId>
