@@ -1,6 +1,7 @@
 package com.parqour.resiliencedemo.wiremock;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.okJson;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -68,9 +69,8 @@ public class WiremockTestIT {
   void mockUpstreamServiceResponse200WithBody() {
     wireMock.stubFor(
         WireMock.get(WireMock.urlMatching("/todos"))
-            .willReturn(aResponse()
-                .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                .withBody("""
+            .willReturn(
+                okJson("""
                     [
                         {
                           "userId": 1,
