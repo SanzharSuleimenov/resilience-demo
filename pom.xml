@@ -34,7 +34,11 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-aop</artifactId>
     </dependency>
-
+    <!--  Authorization Server  -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-oauth2-authorization-server</artifactId>
+    </dependency>
     <!-- https://mvnrepository.com/artifact/io.github.resilience4j/resilience4j-all -->
     <dependency>
       <groupId>io.github.resilience4j</groupId>
@@ -91,6 +95,10 @@
       <version>RELEASE</version>
       <scope>provided</scope>
     </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+    </dependency>
   </dependencies>
 
   <build>
@@ -104,7 +112,7 @@
         <artifactId>gatling-maven-plugin</artifactId>
         <version>4.2.9</version>
         <configuration>
-          <simulationClass>com.parqour.resiliencedemo.simulation.BulkheadLoadSimulation</simulationClass>
+          <simulationClass>com.parqour.resiliencedemo.payment_gateway.AuthThenCheckAndPaySimulation</simulationClass>
         </configuration>
       </plugin>
     </plugins>
